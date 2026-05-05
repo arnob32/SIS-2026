@@ -42,6 +42,8 @@ Security and privacy: The platform must ensure that users' data and the reports 
 submit are secure and protected and comply with applicable data protection regulations.
 
 
+# For funcitional requirementam and Diagrams follw this links: https://github.com/arnob32/SIS-2026/wiki
+
 # Team Descriptions:  backDoor!
  # Raju Naidu-7213668
  # Junaid Ahmed-
