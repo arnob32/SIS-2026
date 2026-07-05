@@ -1,0 +1,144 @@
+import microservices from "DispatchService.services" as dispatchServices
+import technology from "../technology/javaWithSpring.technology" as java
+
+/*
+ * LEMMA Technology Mapping - Dispatch_Service.
+ * Attaches Spring/JPA/REST technology to the domain types and service operations
+ * (Assignment 6, Task 2 - Microservice Modeling).
+ */
+
+// ===== JPA persistence mapping for the aggregate + entities =====
+
+@technology(java)
+type dispatchServices::domain::MaintenanceDispatch.Report {
+    aspects { java::_aspects.Table("reports"); }
+    status { aspects { java::_aspects.Enumerated(enumType = "STRING"); } }
+    priority { aspects { java::_aspects.Enumerated(enumType = "STRING"); } }
+}
+
+@technology(java)
+type dispatchServices::domain::MaintenanceDispatch.WorkAssignment {
+    aspects { java::_aspects.Table("work_assignments"); }
+    status { aspects { java::_aspects.Enumerated(enumType = "STRING"); } }
+}
+
+@technology(java)
+type dispatchServices::domain::MaintenanceDispatch.StatusHistory {
+    aspects { java::_aspects.Table("status_history"); }
+    previousStatus { aspects { java::_aspects.Enumerated(enumType = "STRING"); } }
+    newStatus { aspects { java::_aspects.Enumerated(enumType = "STRING"); } }
+}
+
+@technology(java)
+type dispatchServices::domain::MaintenanceDispatch.DispatchService {
+    reportRepository { aspects { java::_aspects.Autowired; } }
+    workAssignmentRepository { aspects { java::_aspects.Autowired; } }
+    statusHistoryRepository { aspects { java::_aspects.Autowired; } }
+}
+
+// ===== REST + Spring configuration for the microservice =====
+
+@technology(java)
+dispatchServices::com.example.dispatch.DispatchService {
+    aspects {
+        java::_aspects.Port(8081);
+        java::_aspects.ApplicationName("dispatch-service");
+    }
+
+    interface reports {
+        endpoints { java::_protocols.rest: "/api/reports"; }
+    }
+
+    interface technicians {
+        endpoints { java::_protocols.rest: "/api/technicians"; }
+    }
+
+    operation reports.getReports {
+        endpoints { java::_protocols.rest: "/api/reports"; }
+        aspects { java::_aspects.GetMapping; }
+    }
+
+    operation reports.createReport {
+        endpoints { java::_protocols.rest: "/api/reports"; }
+        aspects { java::_aspects.PostMapping; }
+    }
+
+    operation reports.getOpenReports {
+        endpoints { java::_protocols.rest: "/api/reports/open"; }
+        aspects { java::_aspects.GetMapping; }
+    }
+
+    operation reports.getReport {
+        endpoints { java::_protocols.rest: "/api/reports/{id}"; }
+        aspects { java::_aspects.GetMapping; }
+        parameters {
+            primitive id { aspects { java::_aspects.PathVariable; } }
+        }
+    }
+
+    operation reports.getReportsByStatus {
+        endpoints { java::_protocols.rest: "/api/reports/status/{status}"; }
+        aspects { java::_aspects.GetMapping; }
+    }
+
+    operation reports.prioritizeReport {
+        endpoints { java::_protocols.rest: "/api/reports/{id}/priority"; }
+        aspects { java::_aspects.PostMapping; }
+        parameters {
+            primitive id { aspects { java::_aspects.PathVariable; } }
+        }
+    }
+
+    operation reports.assignWork {
+        endpoints { java::_protocols.rest: "/api/reports/{id}/assign"; }
+        aspects { java::_aspects.PostMapping; }
+        parameters {
+            primitive id { aspects { java::_aspects.PathVariable; } }
+        }
+    }
+
+    operation reports.updateStatus {
+        endpoints { java::_protocols.rest: "/api/reports/{id}/status"; }
+        aspects { java::_aspects.PostMapping; }
+        parameters {
+            primitive id { aspects { java::_aspects.PathVariable; } }
+        }
+    }
+
+    operation reports.resolveReport {
+        endpoints { java::_protocols.rest: "/api/reports/{id}/resolve"; }
+        aspects { java::_aspects.PostMapping; }
+        parameters {
+            primitive id { aspects { java::_aspects.PathVariable; } }
+        }
+    }
+
+    operation reports.rejectReport {
+        endpoints { java::_protocols.rest: "/api/reports/{id}/reject"; }
+        aspects { java::_aspects.PostMapping; }
+        parameters {
+            primitive id { aspects { java::_aspects.PathVariable; } }
+        }
+    }
+
+    operation reports.getAssignments {
+        endpoints { java::_protocols.rest: "/api/reports/{id}/assignments"; }
+        aspects { java::_aspects.GetMapping; }
+        parameters {
+            primitive id { aspects { java::_aspects.PathVariable; } }
+        }
+    }
+
+    operation reports.getHistory {
+        endpoints { java::_protocols.rest: "/api/reports/{id}/history"; }
+        aspects { java::_aspects.GetMapping; }
+        parameters {
+            primitive id { aspects { java::_aspects.PathVariable; } }
+        }
+    }
+
+    operation technicians.getTechnicians {
+        endpoints { java::_protocols.rest: "/api/technicians"; }
+        aspects { java::_aspects.GetMapping; }
+    }
+}
