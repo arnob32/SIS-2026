@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Authority Dashboard</title>
-    <link rel="stylesheet" th:href="@{/style.css}"/>
+
+    <link rel="stylesheet" th:href="@{/style.css}">
 </head>
+
 <body>
 <div class="navbar">
-    <div>
-        <div class="nav-title">Authority Dashboard</div>
-    </div>
-    <div>
-        <span th:text="${me.email}" style="color:#bbb; font-size:12px;"></span>
+    <div class="nav-title">Authority Dashboard</div>
+
+    <div class="nav-right">
+        <span class="email" th:text="${me.email}"></span>
         <a href="/authority/profile/edit">Edit Profile</a>
+
         <form method="post" th:action="@{/logout}" style="display:inline; margin-left:10px;">
             <button class="btn btn-danger" type="submit">Logout</button>
         </form>
@@ -20,70 +24,196 @@
 
 <div class="content">
 
+    <div class="tab-row">
+        <button type="button" class="tab-btn active" data-target="citizens">
+            Citizens <span class="tcount" th:text="${#lists.size(citizens)}">0</span>
+        </button>
 
-    <h3>Citizens (<span th:text="${#lists.size(citizens)}">0</span>)</h3>
-    <table>
-        <tr><th>Name</th><th>Email</th><th>City</th><th>Status</th><th>Actions</th></tr>
-        <tr th:if="${#lists.isEmpty(citizens)}"><td colspan="5">No citizens.</td></tr>
-        <tr th:each="u : ${citizens}">
-            <td th:text="${u.fullName}"></td>
-            <td th:text="${u.email}"></td>
-            <td th:text="${u.city != null ? u.city : '-'}"></td>
-            <td th:text="${u.active ? 'Active' : 'Inactive'}"></td>
-            <td>
-                <a th:href="@{/authority/users/{id}(id=${u.userId})}" class="btn btn-primary">View</a>
-                <form style="display:inline" method="post"
-                      th:action="@{/authority/users/{id}/deactivate(id=${u.userId})}">
-                    <button class="btn btn-warning" th:if="${u.active}"
-                            onclick="return confirm('Deactivate?')">Deactivate</button>
-                </form>
-                <form style="display:inline" method="post"
-                      th:action="@{/authority/users/{id}/delete(id=${u.userId})}">
-                    <button class="btn btn-danger"
-                            onclick="return confirm('Delete permanently?')">Delete</button>
-                </form>
-            </td>
-        </tr>
-    </table>
+        <button type="button" class="tab-btn" data-target="authorities">
+            Authorities <span class="tcount" th:text="${#lists.size(authorities)}">0</span>
+        </button>
 
-    <h3>Authorities (<span th:text="${#lists.size(authorities)}">0</span>)</h3>
-    <table>
-        <tr><th>Name</th><th>Email</th><th>City</th><th>Status</th><th>Actions</th></tr>
-        <tr th:if="${#lists.isEmpty(authorities)}"><td colspan="5">No authorities.</td></tr>
-        <tr th:each="u : ${authorities}">
-            <td th:text="${u.fullName}"></td>
-            <td th:text="${u.email}"></td>
-            <td th:text="${u.city != null ? u.city : '-'}"></td>
-            <td th:text="${u.active ? 'Active' : 'Inactive'}"></td>
-            <td>
-                <a th:href="@{/authority/users/{id}(id=${u.userId})}" class="btn btn-primary">View</a>
-                <form style="display:inline" method="post"
-                      th:action="@{/authority/users/{id}/delete(id=${u.userId})}">
-                    <button class="btn btn-danger" onclick="return confirm('Delete?')">Delete</button>
-                </form>
-            </td>
-        </tr>
-    </table>
+        <button type="button" class="tab-btn" data-target="technicians">
+            Technicians <span class="tcount" th:text="${#lists.size(technicians)}">0</span>
+        </button>
+    </div>
 
-    <h3>Technicians (<span th:text="${#lists.size(technicians)}">0</span>)</h3>
-    <table>
-        <tr><th>Name</th><th>Email</th><th>Specialization</th><th>District</th><th>Status</th><th>Actions</th></tr>
-        <tr th:if="${#lists.isEmpty(technicians)}"><td colspan="6">No technicians.</td></tr>
-        <tr th:each="u : ${technicians}">
-            <td th:text="${u.fullName}"></td>
-            <td th:text="${u.email}"></td>
-            <td th:text="${u.specialization != null ? u.specialization : '-'}"></td>
-            <td th:text="${u.district != null ? u.district : '-'}"></td>
-            <td th:text="${u.active ? 'Active' : 'Inactive'}"></td>
-            <td>
-                <a th:href="@{/authority/users/{id}(id=${u.userId})}" class="btn btn-primary">View</a>
-                <form style="display:inline" method="post"
-                      th:action="@{/authority/users/{id}/delete(id=${u.userId})}">
-                    <button class="btn btn-danger" onclick="return confirm('Delete?')">Delete</button>
-                </form>
-            </td>
-        </tr>
-    </table>
+    <div class="list-panel active" id="panel-citizens">
+        <div class="card">
+            <div class="table-wrap">
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>City</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+
+                    <tr class="empty" th:if="${#lists.isEmpty(citizens)}">
+                        <td colspan="5">No citizens.</td>
+                    </tr>
+
+                    <tr th:each="u : ${citizens}">
+                        <td th:text="${u.fullName}"></td>
+                        <td th:text="${u.email}"></td>
+                        <td th:text="${u.city != null ? u.city : '-'}"></td>
+                        <td>
+                            <span class="pill"
+                                  th:classappend="${u.active} ? ' pill-on' : ' pill-off'"
+                                  th:text="${u.active ? 'Active' : 'Inactive'}"></span>
+                        </td>
+                        <td class="actions">
+                            <a th:href="@{/authority/users/{id}(id=${u.userId})}" class="btn btn-primary">View</a>
+
+                            <form method="post" th:action="@{/authority/users/{id}/deactivate(id=${u.userId})}">
+                                <button type="submit"
+                                        class="btn btn-warning"
+                                        th:if="${u.active}"
+                                        onclick="return confirm('Deactivate?')">
+                                    Deactivate
+                                </button>
+                            </form>
+
+                            <form method="post" th:action="@{/authority/users/{id}/delete(id=${u.userId})}">
+                                <button type="submit"
+                                        class="btn btn-danger"
+                                        onclick="return confirm('Delete permanently?')">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="list-panel" id="panel-authorities">
+        <div class="card">
+            <div class="table-wrap">
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>City</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+
+                    <tr class="empty" th:if="${#lists.isEmpty(authorities)}">
+                        <td colspan="5">No authorities.</td>
+                    </tr>
+
+                    <tr th:each="u : ${authorities}">
+                        <td th:text="${u.fullName}"></td>
+                        <td th:text="${u.email}"></td>
+                        <td th:text="${u.city != null ? u.city : '-'}"></td>
+                        <td>
+                            <span class="pill"
+                                  th:classappend="${u.active} ? ' pill-on' : ' pill-off'"
+                                  th:text="${u.active ? 'Active' : 'Inactive'}"></span>
+                        </td>
+                        <td class="actions">
+                            <a th:href="@{/authority/users/{id}(id=${u.userId})}" class="btn btn-primary">View</a>
+
+                            <form method="post" th:action="@{/authority/users/{id}/delete(id=${u.userId})}">
+                                <button type="submit"
+                                        class="btn btn-danger"
+                                        onclick="return confirm('Delete?')">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="list-panel" id="panel-technicians">
+        <div class="card">
+            <div class="table-wrap">
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Specialization</th>
+                        <th>District</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+
+                    <tr class="empty" th:if="${#lists.isEmpty(technicians)}">
+                        <td colspan="6">No technicians.</td>
+                    </tr>
+
+                    <tr th:each="u : ${technicians}">
+                        <td th:text="${u.fullName}"></td>
+                        <td th:text="${u.email}"></td>
+                        <td th:text="${u.specialization != null ? u.specialization : '-'}"></td>
+                        <td th:text="${u.district != null ? u.district : '-'}"></td>
+                        <td>
+                            <span class="pill"
+                                  th:classappend="${u.active} ? ' pill-on' : ' pill-off'"
+                                  th:text="${u.active ? 'Active' : 'Inactive'}"></span>
+                        </td>
+                        <td class="actions">
+                            <a th:href="@{/authority/users/{id}(id=${u.userId})}" class="btn btn-primary">View</a>
+
+                            <form method="post" th:action="@{/authority/users/{id}/delete(id=${u.userId})}">
+                                <button type="submit"
+                                        class="btn btn-danger"
+                                        onclick="return confirm('Delete?')">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const buttons = document.querySelectorAll(".tab-btn");
+        const panels = document.querySelectorAll(".list-panel");
+
+        buttons.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                const target = btn.getAttribute("data-target");
+                const targetPanel = document.getElementById("panel-" + target);
+
+                buttons.forEach(function (b) {
+                    b.classList.remove("active");
+                });
+
+                panels.forEach(function (panel) {
+                    panel.classList.remove("active");
+                    panel.style.display = "none";
+                });
+
+                btn.classList.add("active");
+
+                if (targetPanel) {
+                    targetPanel.classList.add("active");
+                    targetPanel.style.display = "block";
+                }
+            });
+        });
+
+        panels.forEach(function (panel) {
+            if (panel.classList.contains("active")) {
+                panel.style.display = "block";
+            } else {
+                panel.style.display = "none";
+            }
+        });
+    });
+</script>
+
 </body>
 </html>
