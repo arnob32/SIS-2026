@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Technician Dashboard</title>
+    <link rel="stylesheet" th:href="@{/style.css}"/>
+</head>
+<body>
+<div class="navbar">
+    <div>
+        <div class="nav-title">Technician Dashboard</div>
+    </div>
+    <div>
+        <span th:text="${user.email}" style="color:#bbb; font-size:12px;"></span>
+        
+        <form method="post" th:action="@{/logout}" style="display:inline; margin-left:10px;">
+            <button class="btn btn-danger" type="submit">Logout</button>
+        </form>
+    </div>
+</div>
+
+<div class="content">
+    <h2>Welcome, <span th:text="${user.fullName}">Technician</span>!</h2>
+
+    <h3>My Profile</h3>
+    <table class="detail-table" style="width:auto;">
+        <tr><th>Full Name</th><td th:text="${user.fullName}"></td></tr>
+        <tr><th>Email</th><td th:text="${user.email}"></td></tr>
+        <tr><th>Phone</th><td th:text="${user.phoneNumber != null ? user.phoneNumber : '-'}"></td></tr>
+        <tr><th>City</th><td th:text="${user.city != null ? user.city : '-'}"></td></tr>
+        <tr><th>Specialization</th><td th:text="${user.specialization != null ? user.specialization : '-'}"></td></tr>
+        <tr><th>District</th><td th:text="${user.district != null ? user.district : '-'}"></td></tr>
+        <tr><th>Status</th><td th:text="${user.active ? 'Active' : 'Inactive'}"></td></tr>
+    </table>
+    <br/>
+    <a href="/technician/profile/edit" class="btn btn-primary">Edit My Profile</a>
+
+    <h3>My Work</h3>
+    <div class="card-grid">
+        <a class="action-card" href="#">
+            <div class="card-title">My Assigned Work Orders</div>
+            <div class="card-desc">See repair work assigned to you.</div>
+        </a>
+        <a class="action-card" href="#">
+            <div class="card-title">All Work Orders</div>
+            <div class="card-desc">View the full dispatch board.</div>
+        </a>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,131 @@
+@startuml Maintenance_Dispatch_UML
+title Maintenance Dispatch - Tactical Design (matches Dispatch_Service code)
+
+skinparam classAttributeIconSize 0
+hide circle
+skinparam class {
+  BackgroundColor #F5FFF5
+  BorderColor #2E7D32
+  ArrowColor #2E7D32
+}
+
+class DispatchService <<DomainService>> {
+  +receiveReport(sourceReportId, title, description, location) : Report
+  +assignReport(reportId, assignedTo, dueDate) : Report
+  +prioritizeReport(reportId, priority) : Report
+  +updateReportStatus(reportId, newStatus, changedBy) : Report
+  +resolveReport(reportId, changedBy) : Report
+  +rejectReport(reportId, changedBy) : Report
+}
+
+class ReportRepository <<Repository>> {
+  +findById(id) : Report
+  +findByStatus(status) : List<Report>
+  +findByStatusNotIn(statuses) : List<Report>
+  +save(report) : Report
+}
+
+class WorkAssignmentRepository <<Repository>> {
+  +findByReportId(reportId) : List<WorkAssignment>
+  +findByAssignedTo(assignedTo) : List<WorkAssignment>
+  +save(assignment) : WorkAssignment
+}
+
+class StatusHistoryRepository <<Repository>> {
+  +findByReportId(reportId) : List<StatusHistory>
+  +save(history) : StatusHistory
+}
+
+class Report <<AggregateRoot>> {
+  -id : String
+  -sourceReportId : String
+  -title : String
+  -description : String
+  -location : String
+  -status : ReportStatus
+  -priority : Priority
+  -submittedAt : LocalDateTime
+  -updatedAt : LocalDateTime
+  +assignWork()
+  +changeStatus(newStatus)
+  +setPriority(newPriority)
+  +resolveReport()
+  +rejectReport()
+}
+
+class WorkAssignment <<Entity>> {
+  -id : String
+  -reportId : String
+  -assignedTo : String
+  -assignedAt : LocalDateTime
+  -dueDate : LocalDateTime
+  -status : AssignmentStatus
+  +assign()
+  +complete()
+  +cancel()
+}
+
+class StatusHistory <<Entity>> {
+  -id : String
+  -reportId : String
+  -previousStatus : ReportStatus
+  -newStatus : ReportStatus
+  -changedAt : LocalDateTime
+  -changedBy : String
+}
+
+enum ReportStatus <<ValueObject>> {
+  SUBMITTED
+  UNDER_REVIEW
+  IN_PROGRESS
+  RESOLVED
+  REJECTED
+}
+
+enum Priority <<ValueObject>> {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AssignmentStatus <<ValueObject>> {
+  PENDING
+  ASSIGNED
+  COMPLETED
+  CANCELLED
+}
+
+class RestClient <<Adapter>> {
+  +postStatusChanged(event)
+  +postReportResolved(event)
+}
+
+class ReportStatusChangedEvent <<DomainEvent>> {
+  -reportId : String
+  -previousStatus : ReportStatus
+  -newStatus : ReportStatus
+  -occurredAt : LocalDateTime
+}
+
+class ReportResolvedEvent <<DomainEvent>> {
+  -reportId : String
+  -occurredAt : LocalDateTime
+}
+
+DispatchService --> ReportRepository
+DispatchService --> WorkAssignmentRepository
+DispatchService --> StatusHistoryRepository
+DispatchService --> RestClient
+ReportRepository --> Report
+WorkAssignmentRepository --> WorkAssignment
+StatusHistoryRepository --> StatusHistory
+Report "1" *-- "0..*" WorkAssignment
+Report "1" *-- "0..*" StatusHistory
+Report --> ReportStatus
+Report --> Priority
+WorkAssignment --> AssignmentStatus
+StatusHistory --> ReportStatus
+RestClient ..> ReportStatusChangedEvent
+RestClient ..> ReportResolvedEvent
+@enduml

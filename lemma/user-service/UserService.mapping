@@ -1,0 +1,100 @@
+// LEMMA Mapping Model - User Service
+// Maps the domain + service to technology (JPA + Spring REST),
+// exactly like the professor's customerCore mapping file.
+// Uses ONLY javaWithSpring aspects (all names taken from the example, so they exist).
+//
+// NOTE: this is the most detailed file. If any aspect name shows red, put the cursor
+// after "java::_aspects." and press Ctrl+Space to see what your javaWithSpring offers.
+
+import microservices from "UserService.services" as userServices
+import technology from "../technology/javaWithSpring.technology" as java
+
+// --- Entity mapping (JPA) ---
+@technology(java)
+type userServices::domain::userManagement.User {
+	aspects { java::_aspects.Table("users"); }
+}
+
+// --- Microservice mapping (application config + REST endpoints) ---
+@technology(java)
+userServices::com.example.userservice.UserService {
+	aspects {
+		java::_aspects.ApplicationName("user-service");
+		java::_aspects.DatasourceConfiguration(
+			url = "jdbc:h2:mem:userdb;DB_CLOSE_DELAY=-1",
+			username = "sa",
+			password = "",
+			driverClassName = "org.h2.Driver"
+		);
+		java::_aspects.HibernateConfiguration("update");
+		java::_aspects.Port(8082);
+	}
+
+	interface users {
+		endpoints { java::_protocols.rest: "/api/users"; }
+	}
+
+	operation users.registerUser {
+		endpoints { java::_protocols.rest: "/register"; }
+		aspects { java::_aspects.PostMapping; }
+		parameters {
+			complex command { aspects { java::_aspects.Valid; java::_aspects.RequestBody; } }
+			complex response : java::_types.ResponseEntity;
+		}
+	}
+
+	operation users.getAllUsers {
+		endpoints { java::_protocols.rest: "/all"; }
+		aspects { java::_aspects.GetMapping; }
+		parameters {
+			complex response : java::_types.ResponseEntity;
+		}
+	}
+
+	operation users.getUser {
+		endpoints { java::_protocols.rest: "/{userId}"; }
+		aspects { java::_aspects.GetMapping; }
+		parameters {
+			primitive userId { aspects { java::_aspects.PathVariable; } }
+			complex response : java::_types.ResponseEntity;
+			primitive userNotFound { aspects { java::_aspects.ResponseStatus("NOT_FOUND"); } }
+		}
+	}
+
+	operation users.getUsersByRole {
+		endpoints { java::_protocols.rest: "/role/{role}"; }
+		aspects { java::_aspects.GetMapping; }
+		parameters {
+			primitive role { aspects { java::_aspects.PathVariable; } }
+			complex response : java::_types.ResponseEntity;
+		}
+	}
+
+	operation users.updateUser {
+		endpoints { java::_protocols.rest: "/update"; }
+		aspects { java::_aspects.PostMapping; }
+		parameters {
+			complex command { aspects { java::_aspects.Valid; java::_aspects.RequestBody; } }
+			complex response : java::_types.ResponseEntity;
+			primitive userNotFound { aspects { java::_aspects.ResponseStatus("NOT_FOUND"); } }
+		}
+	}
+
+	operation users.deactivateUser {
+		endpoints { java::_protocols.rest: "/{userId}/deactivate"; }
+		aspects { java::_aspects.PostMapping; }
+		parameters {
+			primitive userId { aspects { java::_aspects.PathVariable; } }
+			primitive userNotFound { aspects { java::_aspects.ResponseStatus("NOT_FOUND"); } }
+		}
+	}
+
+	operation users.deleteUser {
+		endpoints { java::_protocols.rest: "/{userId}/delete"; }
+		aspects { java::_aspects.PostMapping; }
+		parameters {
+			primitive userId { aspects { java::_aspects.PathVariable; } }
+			primitive userNotFound { aspects { java::_aspects.ResponseStatus("NOT_FOUND"); } }
+		}
+	}
+}

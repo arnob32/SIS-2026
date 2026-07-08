@@ -1,0 +1,39 @@
+import microservices from "DispatchService.services" as services
+import technology from "../technology/docker.technology" as docker
+import technology from "../technology/javaWithSpring.technology" as protocol
+
+/*
+ * LEMMA Operation (Deployment) Model - Dispatch_Service.
+ * Models the Docker container that deploys the microservice
+ * (Assignment 6, Task 3 - Deployment Modeling).
+ */
+
+@technology(docker)
+@technology(protocol)
+container DispatchServiceContainer deployment technology docker::_deployment.Docker
+    deploys services::com.example.dispatch.DispatchService {
+    services::com.example.dispatch.DispatchService {
+        Dockerfile('
+            FROM eclipse-temurin:17-jdk
+            COPY target/Dispatch_Service-0.0.1-SNAPSHOT.jar app.jar
+            EXPOSE 8081
+            ENTRYPOINT ["java","-jar","/app.jar"]
+        ')
+
+        ComposePart('
+            dispatch-service:
+                build: Dispatch_Service
+                image: backdoor/dispatch-service
+                depends_on:
+                  - eureka-server
+                  - config-server
+                environment:
+                  - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka"
+                  - "SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888"
+                ports:
+                  - "8081:8081"
+        ')
+
+        basic endpoints { protocol::_protocols.rest: "http://localhost:8081"; }
+    }
+}

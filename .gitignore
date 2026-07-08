@@ -1,0 +1,13 @@
+target/
+*.class
+*.jar
+.idea/
+.vscode/
+.metadata/
+.project
+*.log
+*.db
+*.mv.db
+userdb*
+HELP.md
+.DS_Store

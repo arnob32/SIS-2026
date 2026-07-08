@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Citizen Dashboard</title>
+    <link rel="stylesheet" th:href="@{/style.css}"/>
+    <style>
+        /* --- toast (self-contained, no library needed) --- */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1c1e21;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s ease, transform .25s ease;
+            z-index: 1000;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <div>
+        <div class="nav-title">Citizen Dashboard</div>
+        <div class="nav-sub">Road Condition Monitoring</div>
+    </div>
+    <div>
+        <span th:text="${user.email}" style="color:#bbb; font-size:12px;"></span>
+        <a href="/citizen/profile/edit">Edit Profile</a>
+        <form method="post" th:action="@{/logout}" style="display:inline; margin-left:10px;">
+            <button class="btn btn-danger" type="submit">Logout</button>
+        </form>
+    </div>
+</div>
+
+<div class="content">
+    <h2>Welcome, <span th:text="${user.fullName}">Citizen</span>!</h2>
+
+
+
+    <h3>My Profile</h3>
+    <table class="detail-table" style="width:auto;">
+        <tr><th>Full Name</th><td th:text="${user.fullName}"></td></tr>
+        <tr><th>Email</th><td th:text="${user.email}"></td></tr>
+        <tr><th>Phone</th><td th:text="${user.phoneNumber != null ? user.phoneNumber : '-'}"></td></tr>
+        <tr><th>City</th><td th:text="${user.city != null ? user.city : '-'}"></td></tr>
+        <tr><th>Status</th><td th:text="${user.active ? 'Active' : 'Inactive'}"></td></tr>
+    </table>
+    <br/>
+    <a href="/citizen/profile/edit" class="btn btn-primary">Edit My Profile</a>
+
+    <h3>What you can do</h3>
+    <div class="card-grid">
+        <a class="action-card" href="#">
+            <div class="card-title">Report a Road Issue</div>
+            <div class="card-desc">Submit a new road problem.</div>
+        </a>
+        <a class="action-card" href="#">
+            <div class="card-title">Track My Reports</div>
+            <div class="card-desc">See status of your submitted issues.</div>
+        </a>
+        <a class="action-card" href="#">
+            <div class="card-title">My Notifications</div>
+            <div class="card-desc">See updates on your reports.</div>
+        </a>
+        <a class="action-card" href="#">
+            <div class="card-title">Submit Rating</div>
+            <div class="card-desc">Rate completed repairs.</div>
+        </a>
+    </div>
+</div>
+
+<!-- toast element -->
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Wire every action card: block the "#" jump and show a placeholder toast.
+    document.querySelectorAll('.action-card').forEach(function (card) {
+        card.addEventListener('click', function (e) {
+            e.preventDefault();
+            const titleEl = card.querySelector('.card-title');
+            const title = titleEl ? titleEl.textContent.trim() : 'This feature';
+            showToast(title + ' — coming soon');
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+/*
+ * LEMMA Domain Data Model - Maintenance Dispatch bounded context.
+ * Mirrors the DDD building blocks implemented in Dispatch_Service.
+ *
+ * JPA technology information is documented as comments on the elements concerned,
+ * because attaching technology models to domain models is out of scope this semester
+ * (see Assignment 6, Task 2 - Domain Data Modeling).
+ */
+context MaintenanceDispatch {
+
+    // ===== Value Objects (enumerations) =====
+    enum ReportStatus { SUBMITTED, UNDER_REVIEW, IN_PROGRESS, RESOLVED, REJECTED }
+    enum Priority { LOW, MEDIUM, HIGH, CRITICAL }
+    enum AssignmentStatus { PENDING, ASSIGNED, COMPLETED, CANCELLED }
+
+    // ===== Aggregate Root =====
+    // @Entity @Table(name = "reports")
+    structure Report<aggregate, entity> {
+        immutable string id<identifier>,      // @Id
+        string sourceReportId,                // reference to the originating Issue Reporting report
+        string title,
+        string description,
+        string location,
+        ReportStatus status,                  // @Enumerated(EnumType.STRING)
+        Priority priority,                    // @Enumerated(EnumType.STRING)
+        date submittedAt,
+        date updatedAt,
+
+        procedure assignWork,
+        procedure changeStatus(ReportStatus newStatus),
+        procedure setPriority(Priority newPriority),
+        procedure resolveReport,
+        procedure rejectReport
+    }
+
+    collection Reports { Report r }
+
+    // ===== Entities (within the Report aggregate boundary) =====
+    // @Entity @Table(name = "work_assignments")
+    structure WorkAssignment<entity> {
+        immutable string id<identifier>,      // @Id
+        string reportId,
+        string assignedTo,
+        date assignedAt,
+        date dueDate,
+        AssignmentStatus status,              // @Enumerated(EnumType.STRING)
+
+        procedure assign,
+        procedure complete,
+        procedure cancel
+    }
+
+    collection WorkAssignments { WorkAssignment w }
+
+    // @Entity @Table(name = "status_history")
+    structure StatusHistory<entity> {
+        immutable string id<identifier>,      // @Id
+        string reportId,
+        ReportStatus previousStatus,          // @Enumerated(EnumType.STRING)
+        ReportStatus newStatus,               // @Enumerated(EnumType.STRING)
+        date changedAt,
+        string changedBy
+    }
+
+    collection StatusHistories { StatusHistory h }
+
+    // ===== Domain Events (published to Notification and FeedBack contexts) =====
+    structure ReportStatusChangedEvent<domainEvent> {
+        string reportId,
+        ReportStatus previousStatus,
+        ReportStatus newStatus,
+        date occurredAt
+    }
+
+    structure ReportResolvedEvent<domainEvent> {
+        string reportId,
+        date occurredAt
+    }
+
+    // ===== Repositories =====
+    structure ReportRepository<repository> {
+        function Report findById(string id),
+        function Reports findByStatus(ReportStatus status),
+        function Reports findAllOpenReports,
+        function Report save(Report report)
+    }
+
+    structure WorkAssignmentRepository<repository> {
+        function WorkAssignments findByReportId(string reportId),
+        function WorkAssignments findByAssignedTo(string assignedTo),
+        function WorkAssignment save(WorkAssignment assignment)
+    }
+
+    structure StatusHistoryRepository<repository> {
+        function StatusHistories findByReportId(string reportId),
+        function StatusHistory save(StatusHistory history)
+    }
+
+    // ===== Domain Service =====
+    structure DispatchService<domainService> {
+        hide immutable ReportRepository reportRepository,
+        hide immutable WorkAssignmentRepository workAssignmentRepository,
+        hide immutable StatusHistoryRepository statusHistoryRepository,
+        function Report receiveReport(string sourceReportId, string title, string description, string location),
+        function Report assignReport(string reportId, string assignedTo, date dueDate),
+        function Report prioritizeReport(string reportId, Priority priority),
+        function Report updateReportStatus(string reportId, ReportStatus newStatus, string changedBy),
+        function Report resolveReport(string reportId, string changedBy),
+        function Report rejectReport(string reportId, string changedBy)
+    }
+}

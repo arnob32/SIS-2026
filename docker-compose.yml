@@ -1,0 +1,59 @@
+version: "3.8"
+
+services:
+  eureka-server:
+    build:
+      context: ./eureka-server/eureka-server
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    environment:
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+    networks:
+      - backend
+
+  config-server:
+    build:
+      context: ./config-server
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    depends_on:
+      - eureka-server
+    networks:
+      - backend
+
+  user-service:
+    build:
+      context: ./User_Service
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    depends_on:
+      - eureka-server
+      - config-server
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888/
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - backend
+
+  dispatch-service:
+    build:
+      context: ./Dispatch_Service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      - eureka-server
+      - config-server
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888/
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

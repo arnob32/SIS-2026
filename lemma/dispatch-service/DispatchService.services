@@ -1,0 +1,124 @@
+import datatypes from "DispatchDomain.data" as domain
+
+/*
+ * LEMMA Service Model - Dispatch_Service microservice.
+ * Technology-agnostic: REST/Spring/JPA aspects are attached in DispatchService.mapping.
+ */
+public functional microservice com.example.dispatch.DispatchService {
+
+    interface reports {
+        ---
+        Ingest a report handed over from the Issue Reporting context.
+        ---
+        createReport(
+            sync sourceReportId : string,
+            sync title : string,
+            sync description : string,
+            sync location : string,
+            sync out report : domain::MaintenanceDispatch.Report
+        );
+
+        ---
+        List all reports.
+        ---
+        getReports(
+            sync out reports : domain::MaintenanceDispatch.Reports
+        );
+
+        ---
+        List reports that are not yet in a terminal state.
+        ---
+        getOpenReports(
+            sync out reports : domain::MaintenanceDispatch.Reports
+        );
+
+        ---
+        Get a single report by id.
+        ---
+        getReport(
+            sync id : string,
+            sync out report : domain::MaintenanceDispatch.Report,
+            sync out fault reportNotFound : string
+        );
+
+        ---
+        List reports filtered by status.
+        ---
+        getReportsByStatus(
+            sync status : domain::MaintenanceDispatch.ReportStatus,
+            sync out reports : domain::MaintenanceDispatch.Reports
+        );
+
+        ---
+        Set the priority of a report.
+        ---
+        prioritizeReport(
+            sync id : string,
+            sync priority : domain::MaintenanceDispatch.Priority,
+            sync out report : domain::MaintenanceDispatch.Report
+        );
+
+        ---
+        Assign work to a technician/team (moves the report to IN_PROGRESS).
+        ---
+        assignWork(
+            sync id : string,
+            sync assignedTo : string,
+            sync dueDate : string,
+            sync out report : domain::MaintenanceDispatch.Report
+        );
+
+        ---
+        Transition a report to a new status.
+        ---
+        updateStatus(
+            sync id : string,
+            sync status : domain::MaintenanceDispatch.ReportStatus,
+            sync changedBy : string,
+            sync out report : domain::MaintenanceDispatch.Report,
+            sync out fault illegalTransition : string
+        );
+
+        ---
+        Mark a report resolved.
+        ---
+        resolveReport(
+            sync id : string,
+            sync out report : domain::MaintenanceDispatch.Report
+        );
+
+        ---
+        Reject a report.
+        ---
+        rejectReport(
+            sync id : string,
+            sync out report : domain::MaintenanceDispatch.Report
+        );
+
+        ---
+        Work assignments of a report.
+        ---
+        getAssignments(
+            sync id : string,
+            sync out assignments : domain::MaintenanceDispatch.WorkAssignments
+        );
+
+        ---
+        Status-transition audit trail of a report.
+        ---
+        getHistory(
+            sync id : string,
+            sync out history : domain::MaintenanceDispatch.StatusHistories
+        );
+    }
+
+    interface technicians {
+        ---
+        Technician list obtained from the User_Service via Eureka discovery,
+        guarded by a Resilience4j circuit breaker (falls back to a cached list).
+        ---
+        getTechnicians(
+            sync out technicians : string
+        );
+    }
+}

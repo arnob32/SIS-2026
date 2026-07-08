@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Profile</title>
+    <link rel="stylesheet" th:href="@{/style.css}"/>
+</head>
+<body>
+<div class="navbar">
+    <div><div class="nav-title">Edit Profile</div></div>
+    <div><a href="/technician/dashboard">Back</a></div>
+</div>
+
+<div class="content">
+    <h2>Edit My Profile</h2>
+
+    <form method="post" th:action="@{/technician/profile/edit}">
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" name="fullName" th:value="${user.fullName}" required/>
+        </div>
+        <div class="form-group">
+            <label>Phone Number</label>
+            <input type="text" name="phoneNumber" th:value="${user.phoneNumber}"/>
+        </div>
+        <div class="form-group">
+            <label>City</label>
+            <input type="text" name="city" th:value="${user.city}"/>
+        </div>
+        <div class="tech-box">
+            <b>Technician fields</b>
+            <div class="form-group">
+                <label>Specialization</label>
+                <select name="specialization">
+                    <option value="Road Repair" th:selected="${user.specialization == 'Road Repair'}">Road Repair</option>
+                    <option value="Traffic Lights" th:selected="${user.specialization == 'Traffic Lights'}">Traffic Lights</option>
+                    <option value="Signage" th:selected="${user.specialization == 'Signage'}">Signage</option>
+                    <option value="Drainage" th:selected="${user.specialization == 'Drainage'}">Drainage</option>
+                    <option value="General" th:selected="${user.specialization == 'General'}">General</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>District</label>
+                <input type="text" name="district" th:value="${user.district}"/>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">Save</button>
+            <a href="/technician/dashboard" class="btn btn-default">Cancel</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

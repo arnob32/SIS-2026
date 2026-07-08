@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Maintenance Dispatch — Dispatch Service</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, Arial, sans-serif; margin: 0; background: #f4f6f8; color: #1c2733; }
+    header { background: #1f7a4d; color: #fff; padding: 16px 24px; }
+    header h1 { margin: 0; font-size: 20px; }
+    header p { margin: 4px 0 0; font-size: 13px; opacity: .9; }
+    main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+    .bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    button { cursor: pointer; border: 1px solid #cfd8e0; background: #fff; padding: 6px 12px;
+             border-radius: 6px; font-size: 13px; }
+    button.primary { background: #1f7a4d; color: #fff; border-color: #1f7a4d; }
+    button:hover { filter: brightness(.96); }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #eef1f4; font-size: 13px; }
+    th { background: #eaf3ee; font-weight: 600; }
+    tr:last-child td { border-bottom: none; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .s-SUBMITTED { background:#e3eefc; color:#1d4ed8; }
+    .s-UNDER_REVIEW { background:#fef3c7; color:#92400e; }
+    .s-IN_PROGRESS { background:#dbeafe; color:#1e40af; }
+    .s-RESOLVED { background:#dcfce7; color:#166534; }
+    .s-REJECTED { background:#fee2e2; color:#991b1b; }
+    .p-LOW{color:#475569}.p-MEDIUM{color:#0369a1}.p-HIGH{color:#c2410c}.p-CRITICAL{color:#b91c1c;font-weight:700}
+    .actions button { padding: 3px 8px; font-size: 12px; }
+    .card { background:#fff; padding:16px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,.08); margin-bottom:16px; }
+    .card h2 { margin:0 0 12px; font-size:15px; }
+    label { font-size:12px; display:block; margin:6px 0 2px; color:#475569; }
+    input, select { padding:6px 8px; border:1px solid #cfd8e0; border-radius:6px; font-size:13px; width:100%; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; }
+    #msg { font-size:13px; margin-left:8px; }
+    .muted { color:#64748b; font-size:12px; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>🛠️ Maintenance Dispatch Service</h1>
+  <p>DMSA SoSe26 · backDoor · Bounded Context: Maintenance Dispatch (port 8081)</p>
+</header>
+<main>
+  <div class="card">
+    <h2>Ingest report (mock hand-over from Issue Reporting)</h2>
+    <div class="grid">
+      <div><label>Source Report ID</label><input id="sourceReportId" value="ISR-2001"/></div>
+      <div><label>Title</label><input id="title" value="Cracked road surface"/></div>
+      <div><label>Description</label><input id="description" value="Surface cracks over ~20m."/></div>
+      <div><label>Location</label><input id="location" value="Rheinlanddamm, Dortmund"/></div>
+    </div>
+    <div style="margin-top:10px">
+      <button class="primary" onclick="createReport()">+ Add report</button>
+      <span id="msg"></span>
+    </div>
+  </div>
+
+  <div class="bar">
+    <button class="primary" onclick="load('reports')">All reports</button>
+    <button onclick="load('reports/open')">Open only</button>
+    <button onclick="showTechnicians()">Show technicians (mock)</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Title</th><th>Status</th><th>Priority</th><th>Location</th><th>Updated</th><th>Actions</th></tr>
+    </thead>
+    <tbody id="rows"><tr><td colspan="6" class="muted">Loading…</td></tr></tbody>
+  </table>
+  <p class="muted" id="techs"></p>
+</main>
+
+<script>
+const API = '/api';
+
+async function api(path, method = 'GET', body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + '/' + path, opts);
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || res.status); }
+  return res.status === 204 ? null : res.json();
+}
+
+function fmt(dt) { return dt ? dt.replace('T', ' ').slice(0, 16) : ''; }
+
+async function load(path = 'reports') {
+  try {
+    const reports = await api(path);
+    const rows = document.getElementById('rows');
+    if (!reports.length) { rows.innerHTML = '<tr><td colspan="6" class="muted">No reports.</td></tr>'; return; }
+    rows.innerHTML = reports.map(r => `
+      <tr>
+        <td><strong>${r.title ?? ''}</strong><br><span class="muted">${r.sourceReportId ?? ''}</span></td>
+        <td><span class="tag s-${r.status}">${r.status}</span></td>
+        <td class="p-${r.priority}">${r.priority}</td>
+        <td>${r.location ?? ''}</td>
+        <td class="muted">${fmt(r.updatedAt)}</td>
+        <td class="actions">
+          <button onclick="review('${r.id}')">Review</button>
+          <button onclick="assign('${r.id}')">Assign</button>
+          <button onclick="resolve('${r.id}')">Resolve</button>
+          <button onclick="reject('${r.id}')">Reject</button>
+        </td>
+      </tr>`).join('');
+  } catch (e) { say('⚠️ ' + e.message); }
+}
+
+async function createReport() {
+  try {
+    await api('reports', 'POST', {
+      sourceReportId: val('sourceReportId'), title: val('title'),
+      description: val('description'), location: val('location')
+    });
+    say('✅ Report ingested'); load('reports');
+  } catch (e) { say('⚠️ ' + e.message); }
+}
+
+async function review(id) { await transition(id, 'UNDER_REVIEW'); }
+async function transition(id, status) {
+  try { await api('reports/' + id + '/status', 'POST', { status, changedBy: 'AUTHORITY' });
+        say('✅ → ' + status); load('reports'); }
+  catch (e) { say('⚠️ ' + e.message); }
+}
+async function assign(id) {
+  const who = prompt('Assign to technician (name/id):', 'Tom Becker');
+  if (!who) return;
+  try { await api('reports/' + id + '/assign', 'POST', { assignedTo: who });
+        say('✅ Assigned to ' + who + ' (status → IN_PROGRESS)'); load('reports'); }
+  catch (e) { say('⚠️ ' + e.message); }
+}
+async function resolve(id) {
+  try { await api('reports/' + id + '/resolve', 'POST', {}); say('✅ Resolved'); load('reports'); }
+  catch (e) { say('⚠️ ' + e.message); }
+}
+async function reject(id) {
+  try { await api('reports/' + id + '/reject', 'POST', {}); say('✅ Rejected'); load('reports'); }
+  catch (e) { say('⚠️ ' + e.message); }
+}
+async function showTechnicians() {
+  try { const t = await api('technicians');
+        document.getElementById('techs').textContent =
+          'Available technicians (mock from User_Service): ' +
+          t.map(x => x.fullName + ' [' + x.specialization + ']').join(' · '); }
+  catch (e) { say('⚠️ ' + e.message); }
+}
+
+function val(id) { return document.getElementById(id).value; }
+function say(m) { document.getElementById('msg').textContent = m; }
+
+load('reports');
+</script>
+</body>
+</html>

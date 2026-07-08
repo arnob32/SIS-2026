@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Profile</title>
+    <link rel="stylesheet" th:href="@{/style.css}"/>
+</head>
+<body>
+<div class="navbar">
+    <div><div class="nav-title">Edit Profile</div></div>
+    <div><a href="/authority/dashboard">Back</a></div>
+</div>
+
+<div class="content">
+    <h2>Edit My Profile</h2>
+
+    <form method="post" th:action="@{/authority/profile/edit}">
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" name="fullName" th:value="${user.fullName}" required/>
+        </div>
+        <div class="form-group">
+            <label>Phone Number</label>
+            <input type="text" name="phoneNumber" th:value="${user.phoneNumber}"/>
+        </div>
+        <div class="form-group">
+            <label>City</label>
+            <input type="text" name="city" th:value="${user.city}"/>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">Save</button>
+            <a href="/authority/dashboard" class="btn btn-default">Cancel</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>
