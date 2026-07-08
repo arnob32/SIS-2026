@@ -3,18 +3,19 @@
 ## Project Overview
 
 This repository implements a citizen-based road condition monitoring platform using a Spring Boot microservice architecture.
-It includes the following services:
+It includes the following implemented services:
 
 - `config-server` — Spring Cloud Config Server for centralized configuration
 - `eureka-server` — Spring Cloud Netflix Eureka Service Discovery
-- `User_Service` — User and authentication service
+- `User_Service` — Identity and Access Management (users, roles, authentication)
 - `Dispatch_Service` — Maintenance dispatch service
+- `Media_Service` — Media / Photo Management service
 
-The repository also contains additional microservice scaffolds (which were not completed due to other members dropping out) :
+The repository also contains microservice scaffolds for the remaining bounded
+contexts, which are mocked rather than fully implemented:
 - `IssueReport_Service`
 - `Notification_Service`
 - `FeedBack_Service`
-- `Media_Service`
 
 ## Requirements
 
@@ -87,6 +88,13 @@ cd Dispatch_Service
 ./mvnw.cmd spring-boot:run
 ```
 
+### 5. Start media-service
+
+```powershell
+cd Media_Service
+./mvnw.cmd spring-boot:run
+```
+
 ## Service Ports
 
 | Service | Port |
@@ -95,11 +103,11 @@ cd Dispatch_Service
 | `config-server` | `8888` |
 | `dispatch-service` | `8081` |
 | `user-service` | `8082` |
-| `user-service` | `8085` |
+| `media-service` | `8085` |
 
 ## Notes
 
-- The `User_Service` and `Dispatch_Service` are configured to use the config server and Eureka discovery.
+- `User_Service`, `Dispatch_Service` and `Media_Service` are configured to use the config server and Eureka discovery.
 - If you run services manually, start `config-server` and `eureka-server` first.
 
 ## Troubleshooting
