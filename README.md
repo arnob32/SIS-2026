@@ -167,10 +167,10 @@ Documentation and design artifacts are included in the repository:
 - `lemma/`
 - `Labs/`
 
-The original project wiki is also available here:
+The project wiki is available here:
 
 ```text
-https://github.com/arnob32/SIS-2026/wiki
+https://github.com/arnob32/dmsa-sose26-backDoor/wiki
 ```
 
 Design artifacts include requirements, domain model, bounded contexts, context
