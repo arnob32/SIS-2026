@@ -60,7 +60,7 @@ status of submitted issues.
 | `IssueReport_Service` | Issue Reporting | varies/local | Not in repository (documented in wiki / design artifacts) |
 | `Notification_Service` | Notification | varies/local | Scaffold |
 | `FeedBack_Service` | Feedback | varies/local | Scaffold |
-| `Media_Service` | Media / Photo Management | varies/local | Partly implemented/scaffolded |
+| `Media_Service` | Media / Photo Management | 8085 | Implemented |
 
 Because the team composition changed during the semester, the most complete
 runtime path for the final demonstration is the combination of `User_Service`
@@ -194,21 +194,9 @@ maps, event storming material, tactical design/UML material, and LEMMA models.
 ## LEMMA
 
 The LEMMA models are stored in the top-level `lemma` folder, as required by the
-lab submission instructions. They reconstruct the two implemented services.
+lab submission instructions. They reconstruct the three implemented services.
 
 Dispatch service (`lemma/dispatch-service/`):
-<<<<<<< HEAD
-
-- `DispatchDomain.data`
-- `DispatchService.services`
-- `DispatchService.mapping`
-- `DispatchService.operation`
-
-User service (`lemma/`, `UserService.*`), plus the shared technology models:
-
-- `lemma/technology/javaWithSpring.technology`
-- `lemma/technology/docker.technology`
-=======
 
 - `DispatchDomain.data`
 - `DispatchService.services`
@@ -222,11 +210,17 @@ User service (`lemma/user-service/`):
 - `UserService.mapping`
 - `UserService.operation`
 
+Media service (`lemma/media-service/`):
+
+- `MediaDomain.data`
+- `MediaService.services`
+- `MediaService.mapping`
+- `MediaService.operation`
+
 Shared technology models (`lemma/technology/`):
 
 - `javaWithSpring.technology`
 - `docker.technology`
->>>>>>> c523585afafce84bc51fe2b10ebcd273097a3c8c
 
 ## Team
 
