@@ -69,6 +69,13 @@ mocked hand-over data and fallback behavior where necessary.
 
 ## Running the Functional Demo
 
+**Prerequisites:** a JDK 17 or newer with the `JAVA_HOME` environment variable set
+(the Maven wrapper needs it). No database setup is required — the services use an
+in-memory H2 database. The first build downloads dependencies from Maven Central,
+so an internet connection is needed once.
+
+On Windows use `.\mvnw.cmd`; on macOS/Linux use `./mvnw` — both wrappers are included.
+
 Start the services in separate terminals, infrastructure first:
 
 ```powershell
@@ -106,10 +113,19 @@ User Service:  http://localhost:8082
 Dispatch UI:   http://localhost:8081/
 ```
 
-The services can also be started without Config Server or Eureka for local
-testing, because the config import is optional. If `User_Service` is unavailable,
-`Dispatch_Service` still demonstrates fault tolerance by returning fallback
-technician data through its circuit breaker.
+### Which services are required
+
+- **`config-server` and `eureka-server` are optional.** `User_Service` and
+  `Dispatch_Service` both import config with `optional:`, so they start on their
+  own. The minimum demo is just `User_Service` + `Dispatch_Service`.
+- **Eureka is needed for the *live* cross-service data path.** `Dispatch_Service`
+  looks up `User_Service` through Eureka by its logical name (`user-service`).
+  With Eureka running, start it first and allow ~20 seconds for both services to
+  register; `GET /technicians` then returns real technicians from `User_Service`.
+- **Without Eureka (or if `User_Service` is down),** `Dispatch_Service`
+  demonstrates fault tolerance instead: its Resilience4j circuit breaker returns
+  fallback (cached) technician data so the dispatch workflow keeps working. Both
+  behaviours are intended.
 
 ## Dispatch Service Demo Flow
 
