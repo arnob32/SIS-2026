@@ -1,0 +1,67 @@
+import microservices from "MediaService.services" as mediaServices
+import technology from "../technology/javaWithSpring.technology" as java
+
+/*
+ * LEMMA Technology Mapping - Media_Service.
+ * Attaches Spring/JPA/REST technology to the domain types and service operations
+ * (Assignment 6, Task 2 - Microservice Modeling).
+ */
+
+// ===== JPA persistence mapping for the aggregate =====
+
+@technology(java)
+type mediaServices::domain::mediaManagement.Photo {
+    aspects { java::_aspects.Table("photos"); }
+    fileType { aspects { java::_aspects.Enumerated(enumType = "STRING"); } }
+}
+
+@technology(java)
+type mediaServices::domain::mediaManagement.MediaService {
+    photoRepository { aspects { java::_aspects.Autowired; } }
+    photoFactory { aspects { java::_aspects.Autowired; } }
+}
+
+// ===== REST + Spring configuration for the microservice =====
+
+@technology(java)
+mediaServices::com.example.media.MediaService {
+    aspects {
+        java::_aspects.Port(8085);
+        java::_aspects.ApplicationName("media-service");
+    }
+
+    interface photos {
+        endpoints { java::_protocols.rest: "/api/photos"; }
+    }
+
+    operation photos.getPhotos {
+        endpoints { java::_protocols.rest: "/api/photos"; }
+        aspects { java::_aspects.GetMapping; }
+    }
+
+    operation photos.createPhoto {
+        endpoints { java::_protocols.rest: "/api/photos"; }
+        aspects { java::_aspects.PostMapping; }
+    }
+
+    operation photos.getPhoto {
+        endpoints { java::_protocols.rest: "/api/photos/{id}"; }
+        aspects { java::_aspects.GetMapping; }
+        parameters {
+            primitive id { aspects { java::_aspects.PathVariable; } }
+        }
+    }
+
+    operation photos.getPhotosByWorkOrder {
+        endpoints { java::_protocols.rest: "/api/photos/workorder/{workOrderId}"; }
+        aspects { java::_aspects.GetMapping; }
+    }
+
+    operation photos.getMetadata {
+        endpoints { java::_protocols.rest: "/api/photos/{id}/metadata"; }
+        aspects { java::_aspects.GetMapping; }
+        parameters {
+            primitive id { aspects { java::_aspects.PathVariable; } }
+        }
+    }
+}

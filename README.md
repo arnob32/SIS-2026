@@ -197,6 +197,7 @@ The LEMMA models are stored in the top-level `lemma` folder, as required by the
 lab submission instructions. They reconstruct the two implemented services.
 
 Dispatch service (`lemma/dispatch-service/`):
+<<<<<<< HEAD
 
 - `DispatchDomain.data`
 - `DispatchService.services`
@@ -207,6 +208,25 @@ User service (`lemma/`, `UserService.*`), plus the shared technology models:
 
 - `lemma/technology/javaWithSpring.technology`
 - `lemma/technology/docker.technology`
+=======
+
+- `DispatchDomain.data`
+- `DispatchService.services`
+- `DispatchService.mapping`
+- `DispatchService.operation`
+
+User service (`lemma/user-service/`):
+
+- `UserService.data`
+- `UserService.services`
+- `UserService.mapping`
+- `UserService.operation`
+
+Shared technology models (`lemma/technology/`):
+
+- `javaWithSpring.technology`
+- `docker.technology`
+>>>>>>> c523585afafce84bc51fe2b10ebcd273097a3c8c
 
 ## Team
 

@@ -1,0 +1,84 @@
+/*
+ * LEMMA Domain Data Model - Media / Photo Management bounded context.
+ * Mirrors the DDD building blocks implemented in Media_Service.
+ *
+ * JPA technology information is documented as comments on the elements concerned,
+ * because attaching technology models to domain models is out of scope this semester
+ * (see Assignment 6, Task 2 - Domain Data Modeling).
+ */
+context mediaManagement {
+
+    // ===== Value Object (enumeration) =====
+    enum FileType { JPEG, PNG, WEBP }
+
+    // ===== Aggregate Root =====
+    // @Entity @Table(name = "photos")
+    structure Photo<aggregate, entity> {
+        immutable string photoId<identifier>,     // @Id
+        string workOrderId,                        // reference to the Maintenance Dispatch work order
+        string uploaderId,                         // reference to the uploading user
+        string fileName,
+        string fileUrl,
+        FileType fileType,                         // @Enumerated(EnumType.STRING)
+        long fileSize,
+        string description,
+        date uploadedAt,
+        boolean active,
+
+        function boolean validateFile,
+        procedure remove,
+        function boolean isAccessible
+    }
+
+    collection Photos { Photo p }
+
+    // ===== Domain Event (published to Notification / other contexts) =====
+    structure PhotoUploadedPayload<domainEvent> {
+        string photoId,
+        string workOrderId,
+        string fileUrl,
+        date uploadedAt
+    }
+
+    // ===== Value Object (read-only metadata / published language) =====
+    structure PhotoMetadata<valueObject> {
+        string photoId,
+        string workOrderId,
+        string uploaderId,
+        string fileName,
+        string fileUrl,
+        string fileType,
+        long fileSize,
+        boolean active
+    }
+
+    // ===== Repository =====
+    structure PhotoRepository<repository> {
+        function Photo findById(string photoId),
+        function Photos findByWorkOrderId(string workOrderId),
+        function Photos findByUploaderId(string uploaderId),
+        function Photos findByActive(boolean active),
+        function Photo save(Photo photo)
+    }
+
+    // ===== Factory =====
+    structure PhotoFactory<factory> {
+        function Photo create(string workOrderId, string uploaderId, string fileName,
+            string fileUrl, FileType fileType, long fileSize, string description)
+    }
+
+    // ===== Domain Service =====
+    structure MediaService<domainService> {
+        hide immutable PhotoRepository photoRepository,
+        hide immutable PhotoFactory photoFactory,
+        function Photo uploadPhoto(string workOrderId, string uploaderId, string fileName,
+            string fileUrl, FileType fileType, long fileSize, string description),
+        function Photo getPhotoById(string photoId),
+        function Photos getPhotosByWorkOrder(string workOrderId),
+        function Photos getPhotosByUploader(string uploaderId),
+        procedure removePhoto(string photoId),
+        procedure deletePhoto(string photoId),
+        function Photos getAllPhotos,
+        function PhotoMetadata getMetadata(string photoId)
+    }
+}

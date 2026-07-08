@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.media_Service.adapter.RestClient;
+import com.example.media_Service.factory.PhotoFactory;
 import com.example.media_Service.model.FileType;
 import com.example.media_Service.model.Photo;
+import com.example.media_Service.model.PhotoMetadata;
 import com.example.media_Service.model.PhotoUploadedPayload;
 import com.example.media_Service.repository.PhotoRepository;
 
@@ -18,18 +20,18 @@ public class MediaService {
     private PhotoRepository photoRepository;
 
     @Autowired
+    private PhotoFactory photoFactory;
+
+    @Autowired
     private RestClient restClient;
 
     public Photo uploadPhoto(String workOrderId, String uploaderId, String fileName,
                              String fileUrl, FileType fileType, Long fileSize,
                              String description) {
 
-        Photo photo = new Photo(workOrderId, uploaderId, fileName, fileUrl,
+        // The factory validates the file and produces a valid Photo aggregate.
+        Photo photo = photoFactory.create(workOrderId, uploaderId, fileName, fileUrl,
                 fileType, fileSize, description);
-
-        if (!photo.validateFile()) {
-            throw new RuntimeException("Invalid file - size or type not allowed");
-        }
 
         photoRepository.save(photo);
 
@@ -66,5 +68,10 @@ public class MediaService {
 
     public List<Photo> getAllPhotos() {
         return photoRepository.findAll();
+    }
+
+    /** Read-only metadata for another context (published language). */
+    public PhotoMetadata getMetadata(String photoId) {
+        return new PhotoMetadata(getPhotoById(photoId));
     }
 }

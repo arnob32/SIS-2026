@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Media Service - Photo detail</title>
+    <style>
+        body { font-family: system-ui, Arial, sans-serif; margin: 2rem; color: #1c2530; }
+        h1 { color: #1f5a8c; }
+        a { color: #1f5a8c; }
+        table { border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #d5dde5; padding: .5rem .7rem; text-align: left; font-size: .9rem; }
+        th { background: #eef3f8; width: 160px; }
+    </style>
+</head>
+<body>
+    <h1>Photo detail</h1>
+    <p><a th:href="@{/photos}">&larr; Back to photos</a></p>
+
+    <table>
+        <tr><th>Photo ID</th><td th:text="${photo.photoId}">id</td></tr>
+        <tr><th>File name</th><td th:text="${photo.fileName}">file</td></tr>
+        <tr><th>File URL</th><td th:text="${photo.fileUrl}">url</td></tr>
+        <tr><th>Work Order</th><td th:text="${photo.workOrderId}">WO</td></tr>
+        <tr><th>Uploader</th><td th:text="${photo.uploaderId}">uploader</td></tr>
+        <tr><th>Type</th><td th:text="${photo.fileType}">TYPE</td></tr>
+        <tr><th>Size (bytes)</th><td th:text="${photo.fileSize}">0</td></tr>
+        <tr><th>Description</th><td th:text="${photo.description}">-</td></tr>
+        <tr><th>Uploaded at</th><td th:text="${photo.uploadedAt}">-</td></tr>
+        <tr><th>Active</th><td th:text="${photo.active}">true</td></tr>
+    </table>
+</body>
+</html>
