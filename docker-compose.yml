@@ -54,6 +54,21 @@ services:
     networks:
       - backend
 
+  media-service:
+    build:
+      context: ./Media_Service
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8085"
+    depends_on:
+      - eureka-server
+      - config-server
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888/
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - backend
+
 networks:
   backend:
     driver: bridge
