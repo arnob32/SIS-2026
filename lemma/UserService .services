@@ -1,0 +1,72 @@
+// LEMMA Service Model - User Service  (technology-agnostic, like customerCore.services)
+
+import datatypes from "UserService.data" as domain
+
+public functional microservice com.example.userservice.UserService {
+
+	interface users {
+
+		---
+		Register a new user and publish a UserRegisteredEvent.
+		@required command the data of the new user
+		---
+		registerUser(
+			sync command : domain::userManagement.RegisterUserCommand,
+			sync out response : domain::userManagement.UserInformation
+		);
+
+		---
+		Get all users.
+		---
+		getAllUsers(
+			sync out response : domain::userManagement.UserInformationList
+		);
+
+		---
+		Get a single user by id.
+		@required userId the id of the user
+		---
+		getUser(
+			sync userId : string,
+			sync out response : domain::userManagement.UserInformation,
+			sync out fault userNotFound : string
+		);
+
+		---
+		Get all users that have the given role.
+		@required role the role to filter by (CITIZEN, AUTHORITY, TECHNICIAN)
+		---
+		getUsersByRole(
+			sync role : string,
+			sync out response : domain::userManagement.UserInformationList
+		);
+
+		---
+		Update a user's profile data.
+		@required command the user id and the new profile values
+		---
+		updateUser(
+			sync command : domain::userManagement.UpdateUserCommand,
+			sync out response : domain::userManagement.UserInformation,
+			sync out fault userNotFound : string
+		);
+
+		---
+		Deactivate a user and publish a UserDeactivatedEvent.
+		@required userId the id of the user to deactivate
+		---
+		deactivateUser(
+			sync userId : string,
+			sync out fault userNotFound : string
+		);
+
+		---
+		Delete a user permanently.
+		@required userId the id of the user to delete
+		---
+		deleteUser(
+			sync userId : string,
+			sync out fault userNotFound : string
+		);
+	}
+}
