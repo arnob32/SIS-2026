@@ -1,28 +1,39 @@
-// LEMMA Operation (Deployment) Model - User Service
-// Matches the professor's customerCore.operation (deployment_base + javaWithSpring, Kubernetes).
-//
-// The "eureka" import + "depends on nodes" line model that your service registers with Eureka.
-// They rely on your eureka-server folder having an eurekaServer.operation with a ServiceDiscovery
-// node (the professor's project has one). If either line shows red, just delete those two lines.
-
 import microservices from "UserService.services" as userServices
-import technology from "../technology/deployment_base.technology" as deploymentBase
+import technology from "../technology/docker.technology" as docker
 import technology from "../technology/javaWithSpring.technology" as protocolTechnology
-import nodes from "../eureka-server/eurekaServer.operation" as eureka
 
-@technology(deploymentBase)
+/*
+ * LEMMA Operation (Deployment) Model - User Service.
+ * Models the Docker container that deploys the microservice
+ * (Assignment 6, Task 3 - Deployment Modeling).
+ */
+
+@technology(docker)
 @technology(protocolTechnology)
-container UserServiceContainer deployment technology deploymentBase::_deployment.Kubernetes
-	deploys userServices::com.example.userservice.UserService
-	depends on nodes eureka::ServiceDiscovery {
-	userServices::com.example.userservice.UserService {
-		Dockerfile('
-			FROM openjdk:17-jdk-alpine
-			COPY target/User_Service-0.0.1-SNAPSHOT.jar /app.jar
-			EXPOSE 8082
-			ENTRYPOINT ["java","-jar","/app.jar"]
-		')
+container UserServiceContainer deployment technology docker::_deployment.Docker
+    deploys userServices::com.example.userservice.UserService {
+    userServices::com.example.userservice.UserService {
+        Dockerfile('
+            FROM eclipse-temurin:17-jdk
+            COPY target/User_Service-0.0.1-SNAPSHOT.jar app.jar
+            EXPOSE 8082
+            ENTRYPOINT ["java","-jar","/app.jar"]
+        ')
 
-		basic endpoints { protocolTechnology::_protocols.rest: "http://localhost:8082"; }
-	}
+        ComposePart('
+            user-service:
+                build: User_Service
+                image: backdoor/user-service
+                depends_on:
+                  - eureka-server
+                  - config-server
+                environment:
+                  - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka"
+                  - "SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888"
+                ports:
+                  - "8082:8082"
+        ')
+
+        basic endpoints { protocolTechnology::_protocols.rest: "http://localhost:8082"; }
+    }
 }

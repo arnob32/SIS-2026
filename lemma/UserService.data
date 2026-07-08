@@ -21,9 +21,9 @@ context userManagement {
 	}
 
 	enum UserRole {
-		CITIZEN("CITIZEN"),
-		AUTHORITY("AUTHORITY"),
-		TECHNICIAN("TECHNICIAN")
+		CITIZEN,
+		AUTHORITY,
+		TECHNICIAN
 	}
 
 	structure UserRegisteredEvent<valueObject> {
