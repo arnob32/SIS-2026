@@ -1,0 +1,68 @@
+// LEMMA Domain Model - User Service  (context: userManagement)
+// Reconstructed from com.example.User_Service.model.*
+// Matches the professor's customerCore.data style (collection, enum, DDD stereotypes).
+
+context userManagement {
+
+	structure User<entity, aggregate> {
+		immutable string userId<identifier>,
+		string fullName,
+		string email,
+		string password,
+		UserRole role,
+		string phoneNumber,
+		string city,
+		string specialization,
+		string district,
+		boolean active,
+		date createdAt,
+		procedure updateInfo(string name, string phone, string city),
+		procedure deactivate
+	}
+
+	enum UserRole {
+		CITIZEN("CITIZEN"),
+		AUTHORITY("AUTHORITY"),
+		TECHNICIAN("TECHNICIAN")
+	}
+
+	structure UserRegisteredEvent<valueObject> {
+		immutable string userId,
+		immutable string email,
+		immutable UserRole role,
+		immutable date occurredAt
+	}
+
+	structure UserDeactivatedEvent<valueObject> {
+		immutable string userId,
+		immutable date occurredAt
+	}
+
+	structure RegisterUserCommand<valueObject> {
+		immutable string fullName,
+		immutable string email,
+		immutable string password,
+		immutable UserRole role,
+		immutable string phoneNumber,
+		immutable string city,
+		immutable string specialization,
+		immutable string district
+	}
+
+	structure UpdateUserCommand<valueObject> {
+		immutable string userId,
+		immutable string fullName,
+		immutable string phoneNumber,
+		immutable string city
+	}
+
+	structure UserInformation<valueObject> {
+		immutable string userId,
+		immutable string fullName,
+		immutable string email,
+		immutable UserRole role,
+		immutable boolean active
+	}
+
+	collection UserInformationList { UserInformation u }
+}

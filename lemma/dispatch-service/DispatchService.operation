@@ -15,7 +15,7 @@ container DispatchServiceContainer deployment technology docker::_deployment.Doc
     services::com.example.dispatch.DispatchService {
         Dockerfile('
             FROM eclipse-temurin:17-jdk
-            COPY target/PATH_TO_YOUR_SERVICE_JAR_NAME.jar app.jar
+            COPY target/Dispatch_Service-0.0.1-SNAPSHOT.jar app.jar
             EXPOSE 8081
             ENTRYPOINT ["java","-jar","/app.jar"]
         ')

@@ -1,128 +1,223 @@
-
 # Scenario 3: Citizen-based Road Condition Monitoring
 
-# Objective:
-The aim is to develop a software platform for road condition monitoring that provides a costeffective and user-friendly way to monitor and improve the condition of road infrastructure.
-The platform will enable citizens to quickly and easily report the condition of roads, allowing
-potential problems to be identified and rectified more quickly. By involving citizens in the
-monitoring process, it aims to increase community engagement and participation,
-contributing to improved road safety and road conditions.
+This repository contains the DMSA SoSe26 lab project of team **backDoor**.
+The selected scenario is a citizen-based platform for reporting and processing
+road infrastructure problems such as potholes, broken traffic lights, damaged
+signage, and similar issues.
 
-# Basic Requirements: 
+The project was designed as a microservice architecture using Domain-Driven
+Design. The implementation focuses on the currently functional backend services
+and documents the remaining contexts through scaffolds, design artifacts, and
+LEMMA models.
 
-User registration: The platform must allow users to register and create an account so
-that they can submit reports and provide feedback.
+## Evaluation Branch
 
-Submission of reports: Users should be able to submit reports on the condition of road
-infrastructure by taking a photo and adding a description of the condition and problem.
+Please evaluate the `main` branch.
 
-Location data: The platform needs to capture the exact location data of reports to
-enable quick and effective resolution of reported issues.
-Categorization of reports: Users should be able to classify their reports into different
-categories, e.g. potholes, broken traffic lights, missing signage, etc.
+## Application Goal
 
-Notifications: The platform should automatically send notifications to the relevant Monitoring
-authorities as soon as a report is submitted.
+Citizens can report road condition problems with descriptions, categories,
+location information, and media. Authorities can review and prioritize reports,
+dispatch technicians, update processing status, and close reports. The platform
+is intended to improve road safety and give citizens transparency about the
+status of submitted issues.
 
-Processing of reports: Responsible authorities must be able to review and process
-reports to ensure they are correctly categorized and prioritized.
+## Main Requirements
 
-Status update: The platform should allow users to view the status of their reported
-issues, e.g. whether the issue has been resolved or whether it is still in progress.
+- User registration and role-based access for citizens, authorities, and technicians
+- Submission of road condition reports
+- Location data for each report
+- Categorization of reports
+- Notification of responsible authorities
+- Processing, prioritization, and dispatching of reports
+- Status updates for submitted reports
+- Feedback after resolution
+- Analysis of reported problems and bottlenecks
+- Security and privacy for user/report data
 
-Feedback function: Users should be able to provide feedback on the reported problems
-and track the progress of their resolution.
+## Architecture and Technologies
 
-Analysis function: The platform should enable statistical analysis of reported problems
-and their resolution in order to identify trends and bottlenecks and develop more
-effective strategies to improve road conditions.
+- Microservice architecture
+- Domain-Driven Design with bounded contexts
+- Spring Boot backend services
+- Spring MVC and REST APIs
+- Spring Data JPA with H2 for local demonstration
+- Spring Security where applicable
+- Spring Cloud Config for centralized configuration
+- Eureka for service discovery
+- Resilience4j circuit breaker for fault tolerance
+- Simple web UIs for demonstration
+- LEMMA models for architecture reconstruction
 
-Security and privacy: The platform must ensure that users' data and the reports they
-submit are secure and protected and comply with applicable data protection regulations.
-
-
-
-
-##  the platform plan to implemented as a **microservice architecture** using **Java** and the **Spring framework**. The following patterns and technologies are used:
-
-- **Microservice architecture** — the system is decomposed into independently deployable services
-- **API Gateway pattern** — a single entry point routes requests to downstream services
-- **Domain-Driven Design (DDD)** — bounded contexts define service boundaries
-- **RESTful APIs** — synchronous HTTP communication between services and clients
-- **Spring Boot** — application framework for each microservice
-- **Spring Security + JWT** — authentication and authorisation
-- **Spring Data JPA + PostgreSQL** — persistent storage per service
-- **Docker + Docker Compose** — containerisation and local orchestration
-- **Spring Cloud (Eureka, Gateway)** — service discovery and API gateway
-
-
-# Services & Ports
+## Services and Current Status
 
 | Module | Bounded Context | Port | Status |
-|---|---|---|---|
-| `config-server` | Centralized configuration (Spring Cloud Config) | 8888 | Implemented |
-| `eureka-server` | Service discovery (Eureka) | 8761 | Implemented |
-| `User_Service` | Identity & Access Management | 8082 | Implemented |
-| `Dispatch_Service` | Maintenance Dispatch | 8081 | Implemented |
-| `IssueReport_Service` | Issue Reporting | — | Scaffold |
-| `Notification_Service` | Notification | — | Scaffold |
-| `FeedBack_Service` | FeedBack | — | Scaffold |
-| `Media_Service` | Media / Photo Management | — | Scaffold |
+|---|---|---:|---|
+| `config-server` | Centralized Configuration | 8888 | Implemented |
+| `eureka-server/eureka-server` | Service Discovery | 8761 | Implemented |
+| `User_Service` | Identity and Access Management | 8082 | Implemented |
+| `Dispatch_Service` | Maintenance Dispatch | 8081 | Implemented and demo-ready |
+| `IssueReport_Service` | Issue Reporting | varies/local | Not in repository (documented in wiki / design artifacts) |
+| `Notification_Service` | Notification | varies/local | Scaffold |
+| `FeedBack_Service` | Feedback | varies/local | Scaffold |
+| `Media_Service` | Media / Photo Management | varies/local | Partly implemented/scaffolded |
 
-# Running the System
+Because the team composition changed during the semester, the most complete
+runtime path for the final demonstration is the combination of `User_Service`
+and `Dispatch_Service`. Missing cross-service behavior is represented through
+mocked hand-over data and fallback behavior where necessary.
 
-Start each module with `mvn spring-boot:run` in this order (infrastructure first):
+## Running the Functional Demo
 
-1. **config-server** (`config-server/`) → http://localhost:8888
-2. **eureka-server** (`eureka-server/eureka-server/`) → http://localhost:8761
-3. **business services** (e.g. `Dispatch_Service/`, `User_Service/`)
+**Prerequisites:** a JDK 17 or newer with the `JAVA_HOME` environment variable set
+(the Maven wrapper needs it). No database setup is required — the services use an
+in-memory H2 database. The first build downloads dependencies from Maven Central,
+so an internet connection is needed once.
 
-Services can also run standalone: the config import is `optional:`, and the Eureka
-client can be turned off via `eureka.client.enabled=false`.
+On Windows use `.\mvnw.cmd`; on macOS/Linux use `./mvnw` — both wrappers are included.
 
-# Dispatch_Service (Maintenance Dispatch)
+Start the services in separate terminals, infrastructure first:
 
-Implements the Maintenance Dispatch context: receives reports handed over from Issue
-Reporting, then reviews, prioritises, assigns work, tracks status history and resolves
-or rejects them. Built with Spring Boot + Spring MVC + REST and an H2 database.
+```powershell
+cd config-server
+.\mvnw.cmd spring-boot:run
+```
 
-- **DDD building blocks:** `Report` (aggregate root), `WorkAssignment` & `StatusHistory`
-  (entities), `ReportStatus` / `Priority` / `AssignmentStatus` (value objects),
-  `DispatchService` (domain service), three repositories, `RestClient` (publisher).
-- **Integration (Assignment 5 Task 2):** registers with **Eureka**; calls `user-service`
-  for technicians through a **Resilience4j circuit breaker** (with fallback); pulls
-  centralized config from the **config-server**.
-- **Demo UI:** http://localhost:8081/
+```powershell
+cd eureka-server\eureka-server
+.\mvnw.cmd spring-boot:run
+```
 
-Key REST endpoints (base `/api`):
+```powershell
+cd User_Service
+.\mvnw.cmd spring-boot:run
+```
+
+```powershell
+cd Dispatch_Service
+.\mvnw.cmd spring-boot:run
+```
+
+Open the Dispatch demo UI:
+
+```text
+http://localhost:8081/
+```
+
+Useful infrastructure URLs:
+
+```text
+Config Server: http://localhost:8888
+Eureka Server: http://localhost:8761
+User Service:  http://localhost:8082
+Dispatch UI:   http://localhost:8081/
+```
+
+### Which services are required
+
+- **`config-server` and `eureka-server` are optional.** `User_Service` and
+  `Dispatch_Service` both import config with `optional:`, so they start on their
+  own. The minimum demo is just `User_Service` + `Dispatch_Service`.
+- **Eureka is needed for the *live* cross-service data path.** `Dispatch_Service`
+  looks up `User_Service` through Eureka by its logical name (`user-service`).
+  With Eureka running, start it first and allow ~20 seconds for both services to
+  register; `GET /technicians` then returns real technicians from `User_Service`.
+- **Without Eureka (or if `User_Service` is down),** `Dispatch_Service`
+  demonstrates fault tolerance instead: its Resilience4j circuit breaker returns
+  fallback (cached) technician data so the dispatch workflow keeps working. Both
+  behaviours are intended.
+
+## Dispatch Service Demo Flow
+
+The `Dispatch_Service` implements the Maintenance Dispatch bounded context. It
+receives reports from Issue Reporting, reviews them, assigns priorities, assigns
+work to technicians, records status history, and resolves or rejects reports.
+
+Recommended presentation flow:
+
+1. Open `http://localhost:8081/`.
+2. Show the seeded demo reports.
+3. Create a new report using the "Ingest report" form.
+4. Set the report to review.
+5. Assign the report to a technician.
+6. Resolve or reject the report.
+7. Use the API endpoints to show assignments and status history if needed.
+8. Stop or omit `User_Service` to explain the circuit breaker fallback behavior.
+
+## Dispatch REST API
+
+Base path: `/api`
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/reports`, `/reports/open`, `/reports/{id}` | List / read reports |
-| POST | `/reports` | Ingest a report (mock hand-over from Issue Reporting) |
-| POST | `/reports/{id}/priority` | Set priority |
-| POST | `/reports/{id}/assign` | Assign work (→ IN_PROGRESS) |
-| POST | `/reports/{id}/status` | Change status |
-| POST | `/reports/{id}/resolve`, `/reports/{id}/reject` | Close report |
-| GET | `/reports/{id}/assignments`, `/reports/{id}/history` | Work assignments / status audit trail |
-| GET | `/technicians` | Technician list from user-service (circuit-breaker guarded) |
-| GET | `/info` | Shows config loaded from the config-server |
+| `GET` | `/reports` | List all reports |
+| `GET` | `/reports/open` | List non-terminal reports |
+| `GET` | `/reports/{id}` | Read one report |
+| `GET` | `/reports/status/{status}` | Filter reports by status |
+| `POST` | `/reports` | Ingest a report from Issue Reporting |
+| `POST` | `/reports/{id}/priority` | Set priority |
+| `POST` | `/reports/{id}/assign` | Assign work and move to `IN_PROGRESS` |
+| `POST` | `/reports/{id}/status` | Change status |
+| `POST` | `/reports/{id}/resolve` | Resolve a report |
+| `POST` | `/reports/{id}/reject` | Reject a report |
+| `GET` | `/reports/{id}/assignments` | Show work assignments |
+| `GET` | `/reports/{id}/history` | Show status history |
+| `GET` | `/technicians` | Load technicians from `User_Service` with fallback |
+| `GET` | `/info` | Show centralized config message |
 
+## Dispatch DDD Mapping
 
+- Aggregate root: `Report`
+- Entities: `WorkAssignment`, `StatusHistory`
+- Value objects / enums: `ReportStatus`, `Priority`, `AssignmentStatus`
+- Domain service: `DispatchService`
+- Repositories: `ReportRepository`, `WorkAssignmentRepository`, `StatusHistoryRepository`
+- Outbound adapters: `RestClient`, `UserServiceClient`
 
+## Documentation and Design Artifacts
 
-# For funcitional requirementam and Diagrams follow this links: https://github.com/arnob32/SIS-2026/wiki
+Documentation and design artifacts are included in the repository:
 
-# Team Descriptions:  backDoor!
+- `wiki_images/` — domain model, context map, event storming, and UML diagrams
+- `lemma/` — LEMMA architecture models
 
-  1.Raju Naidu - 7213668
-  
-  2.Junaid Ahmed - 7222074
-  
-  3.Helmi Zaki Fadhali - 7225540
-  
-  4.Nawshad Fahim - 7216629
- 
+The full written project documentation (requirements, domain concepts, bounded
+contexts, event storming, tactical design) is maintained in the project wiki:
 
- # Dortmund University Of Applied Science
- #  Course :  Design and Modelling of complex Software Architecture (SOSE26)
+```text
+https://github.com/arnob32/dmsa-sose26-backDoor/wiki
+```
+
+Design artifacts include requirements, domain model, bounded contexts, context
+maps, event storming material, tactical design/UML material, and LEMMA models.
+
+## LEMMA
+
+The LEMMA models are stored in the top-level `lemma` folder, as required by the
+lab submission instructions. They reconstruct the two implemented services.
+
+Dispatch service (`lemma/dispatch-service/`):
+
+- `DispatchDomain.data`
+- `DispatchService.services`
+- `DispatchService.mapping`
+- `DispatchService.operation`
+
+User service (`lemma/`, `UserService.*`), plus the shared technology models:
+
+- `lemma/technology/javaWithSpring.technology`
+- `lemma/technology/docker.technology`
+
+## Team
+
+Team name: **backDoor**
+
+| Member | Matriculation Number |
+|---|---:|
+| Raju Naidu | 7213668 |
+| Junaid Ahmed | 7222074 |
+
+## Course
+
+Dortmund University of Applied Sciences and Arts  
+Design and Modelling of Complex Software Architecture, SoSe26
