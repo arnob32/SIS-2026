@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Media Service - Photos</title>
+    <style>
+        body { font-family: system-ui, Arial, sans-serif; margin: 2rem; color: #1c2530; }
+        h1 { color: #1f5a8c; }
+        .bar { margin-bottom: 1rem; }
+        a.btn, button { background: #1f5a8c; color: #fff; border: none; padding: .45rem .8rem;
+            border-radius: 6px; text-decoration: none; cursor: pointer; font-size: .9rem; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #d5dde5; padding: .5rem .6rem; text-align: left; font-size: .9rem; }
+        th { background: #eef3f8; }
+        .ok { color: #1a7f4b; font-weight: 600; }
+        .removed { color: #b23; }
+        .msg { background: #e6f5ec; color: #1a7f4b; padding: .5rem .8rem; border-radius: 6px; }
+        .muted { color: #6b7a88; font-size: .85rem; }
+    </style>
+</head>
+<body>
+    <h1>Media / Photo Management</h1>
+    <p class="muted">Photo evidence attached to road-condition work orders.</p>
+
+    <div class="bar">
+        <a class="btn" th:href="@{/photos/upload}">+ Upload photo</a>
+    </div>
+
+    <p class="msg" th:if="${param.success}">Photo uploaded successfully.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>File</th><th>Work Order</th><th>Uploader</th><th>Type</th>
+                <th>Size (bytes)</th><th>Status</th><th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="p : ${photos}">
+                <td><a th:href="@{/photos/{id}(id=${p.photoId})}" th:text="${p.fileName}">file</a></td>
+                <td th:text="${p.workOrderId}">WO</td>
+                <td th:text="${p.uploaderId}">uploader</td>
+                <td th:text="${p.fileType}">TYPE</td>
+                <td th:text="${p.fileSize}">0</td>
+                <td>
+                    <span th:if="${p.active}" class="ok">active</span>
+                    <span th:unless="${p.active}" class="removed">removed</span>
+                </td>
+                <td>
+                    <form th:action="@{/photos/{id}/remove(id=${p.photoId})}" method="post"
+                          style="display:inline" th:if="${p.active}">
+                        <button type="submit">Remove</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${photos.isEmpty()}">
+                <td colspan="7" class="muted">No photos yet.</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

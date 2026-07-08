@@ -2,8 +2,12 @@ package com.example.media_Service.controller;
 
 import com.example.media_Service.model.FileType;
 import com.example.media_Service.model.Photo;
+import com.example.media_Service.model.PhotoMetadata;
 import com.example.media_Service.service.MediaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +20,10 @@ public class MediaController {
 
     @Autowired
     private MediaService mediaService;
+
+    /** Externalized property served by the Spring Cloud Config Server (Task 2). */
+    @Value("${media.info-message:(config server not connected)}")
+    private String infoMessage;
 
     // ===================== UI =====================
 
@@ -93,6 +101,20 @@ public class MediaController {
                 .map(this::toDto).toList();
     }
 
+    /** Read-only metadata for another bounded context (published language). */
+    @GetMapping("/api/photos/{id}/metadata")
+    @ResponseBody
+    public PhotoMetadata getMetadata(@PathVariable String id) {
+        return mediaService.getMetadata(id);
+    }
+
+    /** Shows whether centralized configuration was loaded from the Config Server. */
+    @GetMapping("/info")
+    @ResponseBody
+    public Map<String, String> info() {
+        return Map.of("service", "media-service", "configMessage", infoMessage);
+    }
+
     @PostMapping("/api/photos")
     @ResponseBody
     public Map<String, Object> createPhoto(@RequestBody Map<String, Object> body) {
@@ -106,6 +128,19 @@ public class MediaController {
                 (String) body.getOrDefault("description", "")
         );
         return toDto(photo);
+    }
+
+    /**
+     * Maps domain/validation errors on the REST API to proper HTTP status codes:
+     * invalid input -> 400, missing photo -> 404. (UI handlers catch their own errors.)
+     */
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> handleErrors(RuntimeException ex) {
+        String msg = ex.getMessage() == null ? "error" : ex.getMessage();
+        HttpStatus status = msg.toLowerCase().contains("not found")
+                ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+        return ResponseEntity.status(status).body(Map.of("error", msg));
     }
 
     private Map<String, Object> toDto(Photo p) {

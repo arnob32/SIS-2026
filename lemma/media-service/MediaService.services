@@ -1,0 +1,58 @@
+import datatypes from "MediaDomain.data" as domain
+
+/*
+ * LEMMA Service Model - Media_Service microservice.
+ * Technology-agnostic: REST/Spring/JPA aspects are attached in MediaService.mapping.
+ */
+public functional microservice com.example.media.MediaService {
+
+    interface photos {
+        ---
+        Upload a photo for a work order; validates the file and publishes PhotoUploaded.
+        ---
+        createPhoto(
+            sync workOrderId : string,
+            sync uploaderId : string,
+            sync fileName : string,
+            sync fileUrl : string,
+            sync fileType : domain::mediaManagement.FileType,
+            sync fileSize : long,
+            sync description : string,
+            sync out photo : domain::mediaManagement.Photo,
+            sync out fault invalidFile : string
+        );
+
+        ---
+        List all photos.
+        ---
+        getPhotos(
+            sync out photos : domain::mediaManagement.Photos
+        );
+
+        ---
+        Get a single photo by id.
+        ---
+        getPhoto(
+            sync id : string,
+            sync out photo : domain::mediaManagement.Photo,
+            sync out fault photoNotFound : string
+        );
+
+        ---
+        List the photos attached to a work order.
+        ---
+        getPhotosByWorkOrder(
+            sync workOrderId : string,
+            sync out photos : domain::mediaManagement.Photos
+        );
+
+        ---
+        Read-only metadata for another bounded context (published language).
+        ---
+        getMetadata(
+            sync id : string,
+            sync out metadata : domain::mediaManagement.PhotoMetadata,
+            sync out fault photoNotFound : string
+        );
+    }
+}
