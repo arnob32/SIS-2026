@@ -111,6 +111,7 @@ Config Server: http://localhost:8888
 Eureka Server: http://localhost:8761
 User Service:  http://localhost:8082
 Dispatch UI:   http://localhost:8081/
+Media UI:      http://localhost:8085/photos
 ```
 
 ### Which services are required
