@@ -203,10 +203,17 @@ Dispatch service (`lemma/dispatch-service/`):
 - `DispatchService.mapping`
 - `DispatchService.operation`
 
-User service (`lemma/`, `UserService.*`), plus the shared technology models:
+User service (`lemma/user-service/`):
 
-- `lemma/technology/javaWithSpring.technology`
-- `lemma/technology/docker.technology`
+- `UserService.data`
+- `UserService.services`
+- `UserService.mapping`
+- `UserService.operation`
+
+Shared technology models (`lemma/technology/`):
+
+- `javaWithSpring.technology`
+- `docker.technology`
 
 ## Team
 
