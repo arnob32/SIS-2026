@@ -46,6 +46,7 @@ Then open the services in your browser:
 - Config server: http://localhost:8888
 - Dispatch service: http://localhost:8081
 - User service: http://localhost:8082
+- Media service: http://localhost:8085
 
 To stop the stack:
 
@@ -94,6 +95,7 @@ cd Dispatch_Service
 | `config-server` | `8888` |
 | `dispatch-service` | `8081` |
 | `user-service` | `8082` |
+| `user-service` | `8085` |
 
 ## Notes
 
