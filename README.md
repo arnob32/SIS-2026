@@ -57,7 +57,7 @@ status of submitted issues.
 | `eureka-server/eureka-server` | Service Discovery | 8761 | Implemented |
 | `User_Service` | Identity and Access Management | 8082 | Implemented |
 | `Dispatch_Service` | Maintenance Dispatch | 8081 | Implemented and demo-ready |
-| `IssueReport_Service` | Issue Reporting | varies/local | Partly implemented/scaffolded |
+| `IssueReport_Service` | Issue Reporting | varies/local | Not in repository (documented in wiki / design artifacts) |
 | `Notification_Service` | Notification | varies/local | Scaffold |
 | `FeedBack_Service` | Feedback | varies/local | Scaffold |
 | `Media_Service` | Media / Photo Management | varies/local | Partly implemented/scaffolded |
@@ -178,12 +178,11 @@ Base path: `/api`
 
 Documentation and design artifacts are included in the repository:
 
-- `wiki.txt`
-- `wiki_images/`
-- `lemma/`
-- `Labs/`
+- `wiki_images/` — domain model, context map, event storming, and UML diagrams
+- `lemma/` — LEMMA architecture models
 
-The project wiki is available here:
+The full written project documentation (requirements, domain concepts, bounded
+contexts, event storming, tactical design) is maintained in the project wiki:
 
 ```text
 https://github.com/arnob32/dmsa-sose26-backDoor/wiki
@@ -195,14 +194,17 @@ maps, event storming material, tactical design/UML material, and LEMMA models.
 ## LEMMA
 
 The LEMMA models are stored in the top-level `lemma` folder, as required by the
-lab submission instructions.
+lab submission instructions. They reconstruct the two implemented services.
 
-The most complete LEMMA reconstruction currently covers the Dispatch service:
+Dispatch service (`lemma/dispatch-service/`):
 
-- `lemma/dispatch-service/DispatchDomain.data`
-- `lemma/dispatch-service/DispatchService.services`
-- `lemma/dispatch-service/DispatchService.mapping`
-- `lemma/dispatch-service/DispatchService.operation`
+- `DispatchDomain.data`
+- `DispatchService.services`
+- `DispatchService.mapping`
+- `DispatchService.operation`
+
+User service (`lemma/`, `UserService.*`), plus the shared technology models:
+
 - `lemma/technology/javaWithSpring.technology`
 - `lemma/technology/docker.technology`
 
@@ -214,8 +216,6 @@ Team name: **backDoor**
 |---|---:|
 | Raju Naidu | 7213668 |
 | Junaid Ahmed | 7222074 |
-| Helmi Zaki Fadhali | 7225540 |
-| Nawshad Fahim | 7216629 |
 
 ## Course
 
